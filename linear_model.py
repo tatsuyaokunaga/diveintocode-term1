@@ -7,68 +7,79 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
-class LinearModel:
-    def __init__(self, X, y, theta, iterations, alpha):
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+%matplotlib inline
 
+class LinearModel():
+
+    def __init__(self,X,y,theta,ramda=0.05,iterations=1000,alpha = 0.025,threshold=0.5):
+        np.random.seed(seed=10)
+        theta=np.random.rand(5,1)
         self.X = X
         self.y = y
-        self.theta = theta
-        self.iterations = iterations
-        self.alpha = alpha
+        self.theta=theta
+        self.iterations=iterations
+        self.alpha=alpha
+        self.threshold=threshold
+        self.ramda = ramda
+    
+    def sigmoid(self):
+        theta_x = np.dot(self.X,self.theta)
+        return 1/(1+np.exp(-self.theta_x))
 
-    def compute_cost(self, X, y, theta):  # コスト関数
-        m = len(self.y)
-        h = np.dot(self.X, self.theta).flatten()
-        J = 1 / (2 * m) * np.sum(np.square(h - self.y))
-        return J
+    def compute_cost(self):
+       
+        h = sigmoid(self.X,self.theta)
+        m = len(self.X)
+        self.theta[0]=0
+        J = (1/m)*(np.dot(-self.y.T,np.log(h)) - np.dot((1-self.y).T,np.log(1-h)))+\
+                                   (ramda/2*m)*(self.theta**2).sum()
+        return J[0,0]
 
-    def gradient_descent(self, X, y, theta, iteration, alpha):  # 最急降下法
-        past_costs = []
-        past_thetas = [self.theta]
+    def gradient_descent(self):
+        m = len(self.X)
+        past_costs =[]
         for i in range(self.iterations):
-            m = len(X)
-            h = np.dot(X, self.theta).flatten()
-            self.theta -= (self.alpha / m) * (np.sum(np.dot(h - self.y, self.X)))
-            past_costs.append(self.compute_cost(self.X, self.y, self.theta))
-            past_thetas.append(self.theta)
+            past_costs.append(compute_cost(self.X, self.y, self.theta))
+            h_x_y = sigmoid(self.X , self.theta) - self.y
+            theta  = self.theta - (self.alpha/m) * (np_dot + self.ramda*self.theta)
+        
+        return past_costs ,theta
 
-        return past_costs  # , past_thetas
-
-    def plot_learning_curve(self, X, y, theta, iteration, alpha):  # 学習曲線のプロット
-        plt.figure(figsize=(12, 8))
+    def plot_learning_curve(self):
+        plt.figure(figsize=(12,8))
         plt.title("Cost Function J")
         # Plot lines
         plt.xlabel('No. of iterations')
         plt.ylabel('Cost')
         plt.legend()
-        plt.plot(self.gradient_descent(self.X, self.y, self.theta, self.iterations, self.alpha))
-        # Visualize
+        plt.plot(self.past_costs) 
+   
+    # 確率を求める
+    def predict_probs(self):
+        return sigmoid(self.X,self.theta)
+        
+    # 分類を行う。
+    def predict(self):
+        """
+        threshold: 閾値
+        """""
+        theta_x = np.dot(self.X,self.theta)
+        pred = np.sum((sigmoid(self.X,self.theta)>=self.threshold)[:50])  
+    
+        return pred
+    
+        
+train_df = pd.read_csv("iris/Iris.csv")
+y = train_df[["Species"]]
+y=y.reset_index(drop=True)
+y=pd.get_dummies(y["Species"])
+y = y.astype('int8')
+y = y.reset_index(drop=True)
+y = y.drop("Iris-virginica",axis=1)
+X = X.iloc[50:,:]
+X = X.reset_index(drop=True)
 
-
-train_df = pd.read_csv('./train.csv')
-train_df = train_df.drop(train_df[train_df['Id'] == 1299].index)
-train_df = train_df.drop(train_df[train_df['Id'] == 524].index)
-
-x1 = np.array(train_df['GrLivArea']).reshape(-1, 1)
-x2 = np.array(train_df['YearBuilt']).reshape(-1, 1)
-y = train_df['SalePrice']
-X = np.concatenate((x1, x2), axis=1)
-
-min = X.min(axis=None, keepdims=True)
-max = X.max(axis=None, keepdims=True)
-X = (X - min) / (max - min)
-X = np.insert(X, 0, 1, axis=1)
-# yをarray変換
-y = y.values
-# y_numを正規化
-min = y.min(axis=None, keepdims=True)
-max = y.max(axis=None, keepdims=True)
-iteration = 500
-y = (y - min) / (max - min)
-alpha = 0.01
-np.random.seed(seed=10)
-theta = np.random.rand(3, 1)
-model = LinearModel(X, y, theta, iteration, alpha)  # (X,y,theta,500, 0.01
-model.compute_cost(X, y, theta)  # X,y,theta
-model.gradient_descent(X, y, theta, iteration, alpha)
-model.plot_learning_curve(X, y, theta, iteration, alpha)
+model=LinearModel(X,y,theta)
