@@ -70,16 +70,4 @@ class LinearModel():
         pred = np.sum((sigmoid(self.X,self.theta)>=self.threshold)[:50])  
     
         return pred
-    
-        
-train_df = pd.read_csv("iris/Iris.csv")
-y = train_df[["Species"]]
-y=y.reset_index(drop=True)
-y=pd.get_dummies(y["Species"])
-y = y.astype('int8')
-y = y.reset_index(drop=True)
-y = y.drop("Iris-virginica",axis=1)
-X = X.iloc[50:,:]
-X = X.reset_index(drop=True)
-
-model=LinearModel(X,y,theta)
+   
